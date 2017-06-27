@@ -24,7 +24,7 @@ No way to get started right now.
 ## License
 
 This module and the whole directory is subject to
-the [GPLv3 license](LICENSE) or late.  Emacs Packages (unless only
+the [GPLv3 license](LICENSE) or later.  Emacs Packages (unless only
 using an API) are subject to the GPLv3 license.
 
 Copyright (c) 2017 Free Software Foundation
