@@ -6,7 +6,7 @@
 ;; Maintainer: Etienne Prud’homme <etienne@etienne.cc>
 ;; Version: 0.0.1
 ;; Created: 2017-06-20
-;; Last-Updated: Mon Jun 26 20:12:46 (EDT) 2017 by etienne
+;; Last-Updated: Mon Jun 26 22:16:05 (EDT) 2017 by etienne
 ;; Keywords:  emacs-lisp, side-effects, container
 ;; URL: http://github.com/notetienne/emacs-lisp-container
 ;; This file is NOT part of GNU Emacs.
@@ -125,7 +125,30 @@ Wrap BODY in the containers."
   `(container--window
     (container--load
      (container--set
-      ,@body))))
+      (container--eval
+       ,@body)))))
+
+(defun container--eval-container (form &optional lexical)
+  "Private.
+
+Evaluate FORM in a `container--containers'.  This is to override
+the default behavior of the `eval' function.  If LEXICAL is t,
+evaluate using lexical scoping."
+  (eval `(container--containers ,form) lexical))
+
+(defmacro container--eval (&rest body)
+  "Private.
+
+Remove side-effects from the `eval' function in BODY.
+
+This function advises the `eval' function to make modification of
+variables/functions only buffer-local."
+  `(flet ((old-eval (form &optional lexical)
+                    (eval form lexical)))
+     (cl-macrolet ((eval (form &optional lexical)
+                         `(old-eval
+                           (container--eval-container ',form ,lexical))))
+       ,@body)))
 
 (defun container--get-buffer (file)
   "Private.
