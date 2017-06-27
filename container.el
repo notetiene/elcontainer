@@ -6,7 +6,7 @@
 ;; Maintainer: Etienne Prud’homme <etienne@etienne.cc>
 ;; Version: 0.0.1
 ;; Created: 2017-06-20
-;; Last-Updated: Mon Jun 26 19:59:51 (EDT) 2017 by etienne
+;; Last-Updated: Mon Jun 26 20:12:46 (EDT) 2017 by etienne
 ;; Keywords:  emacs-lisp, side-effects, container
 ;; URL: http://github.com/notetienne/emacs-lisp-container
 ;; This file is NOT part of GNU Emacs.
@@ -63,13 +63,19 @@
   "Last value returned by a `container'.")
 
 (defmacro container--window (&rest body)
-  "Evaluate BODY and discard window modifications."
+  "Private.
+
+Evaluate BODY and discard window modifications."
   `(save-window-excursion
      ,@body))
 
 (defmacro container--set (&rest body)
-  "TODO.
-BODY is."
+  "Private.
+
+Remove side-effects from the set functions in BODY.
+
+This function advises the `setq', `set' and `set-default'
+functions to make modification of variables only buffer-local."
   `(flet ((old-set (symbol value)
                    (set symbol value)))
      (cl-macrolet ((setq (symbol value)
@@ -80,10 +86,12 @@ BODY is."
                                 `(set (make-local-variable ,symbol) ,value)))
        ,@body)))
 
-(defmacro container-load (&rest body)
-  "Evaluate BODY and while recording file loading.
+(defmacro container--load (&rest body)
+  "Private.
 
-The loaded features will be unloaded when body is executed."
+Evaluate BODY and while recording file loading.
+
+The loaded features will be unloaded when BODY is executed."
   `(let ((loaded-items '((:require)
                          (:load)
                          (:load-theme)))
@@ -115,12 +123,14 @@ The loaded features will be unloaded when body is executed."
 
 Wrap BODY in the containers."
   `(container--window
-    (container-load
+    (container--load
      (container--set
       ,@body))))
 
 (defun container--get-buffer (file)
-  "Get the buffer for FILE.
+  "Private.
+
+Get the buffer for FILE.
 
 If a buffer for FILE exists, return a new indirect buffer.
 Otherwise, create a new buffer openning FILE."
