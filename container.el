@@ -6,7 +6,7 @@
 ;; Maintainer: Etienne Prud’homme <etienne@etienne.cc>
 ;; Version: 0.0.1
 ;; Created: 2017-06-20
-;; Last-Updated: Mon Jun 26 19:54:17 (EDT) 2017 by etienne
+;; Last-Updated: Mon Jun 26 19:59:51 (EDT) 2017 by etienne
 ;; Keywords:  emacs-lisp, side-effects, container
 ;; URL: http://github.com/notetienne/emacs-lisp-container
 ;; This file is NOT part of GNU Emacs.
@@ -150,16 +150,32 @@ BODY should be forms to exececute in the container."
             ,@body)
         (kill-buffer buffer)))))
 
-(defmacro container (&optional file &rest body)
+(defmacro container--last-value (&rest body)
+  "Private.
+
+Change the `container-last-value' value to what is returned by
+BODY."
+  `(setq container-last-value
+         ,@body))
+
+(defmacro container (&rest body)
+  "Evalute BODY in a container.
+
+The evalution context is a newly created buffer."
+  `(container--last-value
+    (container--evaluator nil
+      ,@body)))
+
+(defmacro container-in-context (&optional file &rest body)
   "Evaluate a form in a container.
 
 FILE is an optional file to set the container context.
 BODY should be forms to exececute in the container.
 
 The value returned by BODY changes `container-last-value'."
-  `(setq container-last-value
-         (container--evaluator ,file
-           ,@body)))
+  `(container--last-value
+    (container--evaluator ,file
+      ,@body)))
 
 (provide 'container)
 ;;; container.el ends here
