@@ -66,6 +66,7 @@
   "Private.
 
 Evaluate BODY and discard window modifications."
+  (declare (indent 0))
   `(save-window-excursion
      ,@body))
 
@@ -76,6 +77,7 @@ Remove side-effects from the set functions in BODY.
 
 This function advises the `setq', `set' and `set-default'
 functions to make modification of variables only buffer-local."
+  (declare (indent 0))
   `(flet ((old-set (symbol value)
                    (set symbol value)))
      (cl-macrolet ((setq (symbol value)
@@ -92,6 +94,7 @@ functions to make modification of variables only buffer-local."
 Evaluate BODY and while recording file loading.
 
 The loaded features will be unloaded when BODY is executed."
+  (declare (indent 0))
   `(let ((loaded-items '((:require)
                          (:load)
                          (:load-theme)))
@@ -122,11 +125,12 @@ The loaded features will be unloaded when BODY is executed."
   "Private.
 
 Wrap BODY in the containers."
+  (declare (indent 0))
   `(container--window
-    (container--load
-     (container--set
-      (container--eval
-       ,@body)))))
+     (container--load
+       (container--set
+         (container--eval
+           ,@body)))))
 
 (defun container--eval-container (form &optional lexical)
   "Private.
@@ -143,6 +147,7 @@ Remove side-effects from the `eval' function in BODY.
 
 This function advises the `eval' function to make modification of
 variables/functions only buffer-local."
+  (declare (indent 0))
   `(flet ((old-eval (form &optional lexical)
                     (eval form lexical)))
      (cl-macrolet ((eval (form &optional lexical)
@@ -177,17 +182,18 @@ FILE is an optional file to set the container context.
 BODY should be forms to exececute in the container."
   (declare (indent 1))
   `(container--containers
-    (let* ((buffer (container--get-buffer ,file)))
-      (prog1
-          (with-current-buffer buffer
-            ,@body)
-        (kill-buffer buffer)))))
+     (let* ((buffer (container--get-buffer ,file)))
+       (prog1
+           (with-current-buffer buffer
+             ,@body)
+         (kill-buffer buffer)))))
 
 (defmacro container--last-value (&rest body)
   "Private.
 
 Change the `container-last-value' value to what is returned by
 BODY."
+  (declare (indent 0))
   `(setq container-last-value
          ,@body))
 
@@ -195,9 +201,10 @@ BODY."
   "Evalute BODY in a container.
 
 The evalution context is a newly created buffer."
+  (declare (indent 0))
   `(container--last-value
-    (container--evaluator nil
-      ,@body)))
+     (container--evaluator nil
+       ,@body)))
 
 (defmacro container-in-context (&optional file &rest body)
   "Evaluate a form in a container.
@@ -206,9 +213,10 @@ FILE is an optional file to set the container context.
 BODY should be forms to exececute in the container.
 
 The value returned by BODY changes `container-last-value'."
+  (declare (indent 0))
   `(container--last-value
-    (container--evaluator ,file
-      ,@body)))
+     (container--evaluator ,file
+       ,@body)))
 
 (provide 'container)
 ;;; container.el ends here
